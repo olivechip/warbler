@@ -3,9 +3,10 @@ import os
 from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message, Follows
+from models import db, connect_db, User, Message, Follows, Likes
 
 CURR_USER_KEY = "curr_user"
 
@@ -114,7 +115,7 @@ def logout():
     """Handle logout of user."""
 
     do_logout()
-    flash('Successfully logged out.')
+    flash('Successfully logged out.','success')
     return redirect("/")
 
 ##############################################################################
@@ -151,6 +152,7 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
+
     return render_template('users/show.html', user=user, messages=messages)
 
 
@@ -212,9 +214,17 @@ def stop_following(follow_id):
 def profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
     form = UserEditForm()
-    curr_user = User.query.get(session[CURR_USER_KEY])
+    curr_user = User.query.get_or_404(session[CURR_USER_KEY])
+
+    if curr_user:
+
+        form.username.render_kw = {'value': curr_user.username}
+        form.email.render_kw = {'value': curr_user.email}
+        form.image_url.render_kw = {'value': curr_user.image_url}
+        form.header_image_url.render_kw = {'value': curr_user.header_image_url}
+        form.bio.data = curr_user.bio
+        form.location.render_kw = {'value': curr_user.location}
 
     if form.validate_on_submit():
         user = User.authenticate(curr_user.username,
@@ -226,6 +236,7 @@ def profile():
             curr_user.image_url = form.image_url.data or User.image_url.default.arg, 
             curr_user.header_image_url = form.header_image_url.data or User.header_image_url.default.arg,
             curr_user.bio = form.bio.data
+            curr_user.location = form.location.data
             
             db.session.commit()
 
@@ -302,6 +313,52 @@ def messages_destroy(message_id):
 
     return redirect(f"/users/{g.user.id}")
 
+##############################################################################
+# Likes routes:
+
+@app.route('/users/<int:user_id>/likes')
+def show_likes(user_id):
+    """Show liked messages."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_msgs = (Message
+                .query
+                .join(Likes, Likes.message_id == Message.id)
+                .filter(Likes.user_id == g.user.id)
+                .all())
+
+    return render_template('/users/likes.html', user=g.user, liked_msgs=liked_msgs)
+
+@app.route('/users/add_like/<int:message_id>', methods=["POST"])
+def like_message(message_id):
+    """Like a message."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_msg = Likes(user_id = g.user.id, message_id = message_id)
+    db.session.add(liked_msg)
+    db.session.commit()
+
+    return redirect('/')
+
+@app.route('/users/remove_like/<int:message_id>', methods=["POST"])
+def unlike_message(message_id):
+    """Unlike a message."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_msg = Likes.query.filter(and_(Likes.user_id == g.user.id, Likes.message_id == message_id)).first()
+    db.session.delete(liked_msg)
+    db.session.commit()
+
+    return redirect('/')
 
 ##############################################################################
 # Homepage and error pages
@@ -318,14 +375,27 @@ def homepage():
     if g.user:
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_([f.id for f in g.user.following] + [g.user.id]))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        likes = [l.message_id for l in Likes.query.filter(Likes.user_id == g.user.id)]
+
+        return render_template('home.html', messages=messages, likes=likes)
 
     else:
         return render_template('home-anon.html')
+
+@app.route('/secret')
+def show_secret():
+    """Show the secret page."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    return render_template('secret.html')
 
 
 ##############################################################################
