@@ -57,4 +57,4 @@ class UserModelTestCase(TestCase):
         self.assertEqual(len(u.messages), 0)
         self.assertEqual(len(u.followers), 0)
 
-        # self.assertEqual(u, f"<User #{self.id}: {self.username}, {self.email}>")
+        self.assertEqual(u, f"<User #{self.id}: {self.username}, {self.email}>")
