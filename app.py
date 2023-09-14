@@ -22,6 +22,7 @@ app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "H@@wA715j&^3m7@7")
 toolbar = DebugToolbarExtension(app)
+app.debug = False
 
 connect_db(app)
 app.app_context().push()
@@ -231,10 +232,10 @@ def profile():
                                  form.password.data)
 
         if user:
-            curr_user.username = form.username.data, 
-            curr_user.email = form.email.data, 
-            curr_user.image_url = form.image_url.data or User.image_url.default.arg, 
-            curr_user.header_image_url = form.header_image_url.data or User.header_image_url.default.arg,
+            curr_user.username = form.username.data
+            curr_user.email = form.email.data
+            curr_user.image_url = form.image_url.data or User.image_url.default.arg
+            curr_user.header_image_url = form.header_image_url.data or User.header_image_url.default.arg
             curr_user.bio = form.bio.data
             curr_user.location = form.location.data
             
