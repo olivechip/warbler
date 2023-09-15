@@ -27,6 +27,10 @@ app.debug = False
 connect_db(app)
 app.app_context().push()
 
+# Create tables for DB, otherwise comment out.
+# db.drop_all()
+# db.create_all()
+
 ##############################################################################
 # User signup/login/logout
 
