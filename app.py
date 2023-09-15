@@ -253,7 +253,7 @@ def profile():
             db.session.commit()
 
             flash("Successfully edited profile.", 'success')
-            return redirect(f"/users/{session[CURR_USER_KEY]}")
+            return redirect("/")
 
         flash("Invalid credentials. Unable to edit profile.", 'danger')
         return redirect('/')
