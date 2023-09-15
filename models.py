@@ -22,84 +22,31 @@ class Follows(db.Model):
 
     __tablename__ = 'follows'
 
-    user_being_followed_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete="cascade"),
-        primary_key=True,
-    )
-
-    user_following_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete="cascade"),
-        primary_key=True,
-    )
-
+    user_being_followed_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="cascade"), primary_key=True)
+    user_following_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="cascade"), primary_key=True)
 
 class Likes(db.Model):
     """Mapping user likes to warbles."""
 
     __tablename__ = 'likes' 
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete='cascade')
-    )
-
-    message_id = db.Column(
-        db.Integer,
-        db.ForeignKey('messages.id', ondelete='cascade')
-    )
-
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='cascade'))
+    message_id = db.Column(db.Integer, db.ForeignKey('messages.id', ondelete='cascade'))
 
 class User(db.Model):
     """User in the system."""
 
     __tablename__ = 'users'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-    )
-
-    email = db.Column(
-        db.Text,
-        nullable=False,
-        unique=True,
-    )
-
-    username = db.Column(
-        db.Text,
-        nullable=False,
-        unique=True,
-    )
-
-    image_url = db.Column(
-        db.Text,
-        default="/static/images/default-pic.png",
-    )
-
-    header_image_url = db.Column(
-        db.Text,
-        default="/static/images/warbler-hero.jpg"
-    )
-
-    bio = db.Column(
-        db.Text,
-    )
-
-    location = db.Column(
-        db.Text,
-    )
-
-    password = db.Column(
-        db.Text,
-        nullable=False,
-    )
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, nullable=False, unique=True)
+    username = db.Column(db.String, nullable=False, unique=True)
+    image_url = db.Column(db.String, default="/static/images/default-pic.png")
+    header_image_url = db.Column(db.String, default="/static/images/warbler-hero.jpg")
+    bio = db.Column(db.String)
+    location = db.Column(db.String)
+    password = db.Column(db.String, nullable=False)
 
     messages = db.relationship('Message', backref='user')
 
@@ -182,24 +129,7 @@ class Message(db.Model):
 
     __tablename__ = 'messages'
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True,
-    )
-
-    text = db.Column(
-        db.String(140),
-        nullable=False,
-    )
-
-    timestamp = db.Column(
-        db.DateTime,
-        nullable=False,
-        default=datetime.utcnow(),
-    )
-
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('users.id', ondelete='CASCADE'),
-        nullable=False,
-    )
+    id = db.Column(db.Integer, primary_key=True)
+    text = db.Column(db.String(140), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)

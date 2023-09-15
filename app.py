@@ -15,14 +15,15 @@ app = Flask(__name__)
 # Get DB_URI from environ variable (useful for production/testing) or,
 # if not set there, use development local db.
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    os.environ.get('DATABASE_URL', 'postgres://tnaztawq:7RXS7kUl-Q_536b7S18UzvOWwNwrCtR4@bubble.db.elephantsql.com/tnaztawq'))
+    # os.environ.get('DATABASE_URL', 'postgres://tnaztawq:7RXS7kUl-Q_536b7S18UzvOWwNwrCtR4@bubble.db.elephantsql.com/tnaztawq'))
+    os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "H@@wA715j&^3m7@7")
 toolbar = DebugToolbarExtension(app)
-app.debug = False
+app.debug = True
 
 connect_db(app)
 app.app_context().push()
@@ -233,7 +234,8 @@ def profile():
         form.email.render_kw = {'value': curr_user.email}
         form.image_url.render_kw = {'value': curr_user.image_url}
         form.header_image_url.render_kw = {'value': curr_user.header_image_url}
-        form.bio.data = curr_user.bio
+        if request.method == "GET":
+            form.bio.data = curr_user.bio
         form.location.render_kw = {'value': curr_user.location}
 
     if form.validate_on_submit():
