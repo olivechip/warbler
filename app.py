@@ -194,7 +194,7 @@ def add_follow(follow_id):
         return redirect("/")
 
     followed_user = User.query.get_or_404(follow_id)
-    
+
     if g.user.id == follow_id:
         flash('You cannot follow yourself.', 'danger')
         return redirect('/')
