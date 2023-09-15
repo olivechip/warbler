@@ -93,9 +93,18 @@ def signup():
         return redirect("/")
 
     else:
+        # delete the following line after testing
         flash('rendering sign up page, GET request')
         return render_template('users/signup.html', form=form)
 
+# delete this route after testing
+@app.route('/test', methods=['GET', 'POST'])
+def test():
+    if request.method == "POST":
+        flash('post request button clicked')
+        return redirect('/')
+    return render_template('users/test.html')
+    
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
