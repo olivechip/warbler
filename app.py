@@ -93,6 +93,7 @@ def signup():
         return redirect("/")
 
     else:
+        flash('rendering sign up page, GET request')
         return render_template('users/signup.html', form=form)
 
 
